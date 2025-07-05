@@ -1,0 +1,38 @@
+
+create a Pod named web-logger with:
+
+Two containers:
+
+nginx using image nginx:alpine
+
+log-collector using image busybox and running tail -f /var/log/nginx/access.log
+
+A shared volume so both containers can access the same log files
+###########
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-logger
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log/nginx
+  - name: log-collector
+    image: busybox
+    command: ["sh", "-c", "tail -f /var/log/nginx/access.log"]
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log/nginx
+  volumes:
+  - name: log-volume
+    emptyDir: {}
+
+#####################
+
+kubectl apply -f web-logger.yaml
+kubectl get pod web-logger
+kubectl logs web-logger -c log-collector
+
