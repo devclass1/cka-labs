@@ -1,0 +1,81 @@
+#########################
+Configure Pod Affinity & Anti-Affinity:
+#########################
+
+Deploy two Deployments:
+
+frontend (3 replicas, label app=frontend)
+
+backend (2 replicas, label app=backend)
+
+Ensure frontend Pods are scheduled on nodes where backend Pods are running (affinity).
+
+Ensure backend Pods avoid running on the same node (anti-affinity).
+############################################################################################
+
+backend Deployment with Pod Anti-Affinity
+##########################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - backend
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: backend
+        image: nginx
+#####################################################
+
+frontend Deployment with Pod Affinity
+#####################################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - backend
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: frontend
+        image: nginx
+############################################################
+
+kubectl apply -f backend.yaml
+kubectl apply -f frontend.yaml
+kubectl get pods -o wide
