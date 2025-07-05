@@ -1,0 +1,26 @@
+######################
+Configure a CronJob:
+#####################
+
+Create a CronJob named cleanup-job that runs every 5 minutes, executing a busybox container that prints "Cleaning up temporary files" and exits.
+######################
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cleanup-job
+spec:
+  schedule: "*/5 * * * *"   # every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cleanup
+            image: busybox
+            command: ["sh", "-c", "echo Cleaning up temporary files"]
+          restartPolicy: OnFailure
+#############################
+
+kubectl get cronjob
+kubectl get jobs --watch
