@@ -1,0 +1,32 @@
+#############################
+Resource Requests & Limits:
+##############################
+
+Create a Pod named resource-demo with:
+
+A container running nginx that requests 100m CPU and 128Mi memory.
+
+A limit of 500m CPU and 512Mi memory.
+
+Verify the Pod is scheduled and check its resource usage with kubectl top.
+##############################################################################
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+##############################################################
+kubectl apply -f resource-demo.yaml
+kubectl get pod resource-demo
+kubectl top pod resource-demo
